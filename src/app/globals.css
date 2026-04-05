@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Cowboy Bebop Color System ── */
+:root {
+  --cb-black:     #070608;
+  --cb-dark-1:    #0f0d0e;
+  --cb-dark-2:    #16110f;
+  --cb-amber:     #d4891a;
+  --cb-amber-lt:  #e8a838;
+  --cb-red:       #b5341e;
+  --cb-red-lt:    #cc4a2a;
+  --cb-cream:     #e8d5b0;
+  --cb-cream-dim: #c4ad86;
+  --cb-warm-gray: #8c7a5e;
+  --cb-dim:       #4a3e30;
+  --cb-surface:   rgba(240, 180, 80, 0.03);
+  --cb-border:    rgba(212, 137, 26, 0.1);
+  --cb-border-md: rgba(212, 137, 26, 0.2);
+  --cb-glow:      rgba(212, 137, 26, 0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--cb-black);
+  color: var(--cb-cream);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Hide scrollbars */
+::-webkit-scrollbar { display: none; }
+body { scrollbar-width: none; }
+
+/* ── Grain / film texture overlay (the Bebop magic) ── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.5;
+}
+
+/* ── Shimmer (loading skeletons) ── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(212, 137, 26, 0.03) 25%,
+    rgba(212, 137, 26, 0.07) 50%,
+    rgba(212, 137, 26, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite;
+}
+
+/* ── Fade in / slide up animations ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.animate-fade-in  { animation: fadeInUp 0.4s ease forwards; }
+.animate-slide-up { animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* ── Subtle scan-line effect (very Bebop) ── */
+@keyframes scanline {
+  from { background-position: 0 0; }
+  to   { background-position: 0 100%; }
+}
+
+/* ── Press effect for interactive cards ── */
+.press-effect { transition: transform 0.15s ease, opacity 0.15s ease; }
+.press-effect:active { transform: scale(0.985); opacity: 0.92; }
+
+/* ── PWA safe area (phone notch/home bar) ── */
+@media all and (display-mode: standalone) {
+  body {
+    padding-top:    env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
