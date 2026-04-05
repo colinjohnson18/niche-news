@@ -220,28 +220,6 @@ function DigestView({ articlesByCategory, categories }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  display: "block", textDecoration: "none", color: "inherit",
-                  padding: "10px 0",
-                  borderBottom: i < arts.length - 1 ? `1px solid ${CB.border}` : "none",
-                }}
-              >
-                <span style={{ fontSize: 14, fontWeight: 600, color: CB.cream, lineHeight: 1.4 }}>
-                  {article.title}
-                </span>
-                <span style={{ display: "block", fontSize: 11, color: CB.warmGray, marginTop: 4 }}>
-                  {article.source} • {timeAgo(article.pubDate)}
-                </span>
-              </a>
-            ))}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-oopener noreferrer"
-                style={{
                   display: "block", padding: "10px 0",
                   borderBottom: i < Math.min(arts.length, 5) - 1 ? `1px solid ${CB.border}` : "none",
                   textDecoration: "none", color: "inherit",
@@ -441,7 +419,20 @@ function LoadingSkeleton() {
     </div>
   );
 }
-tem("nichenews-v2-categories");
+
+// ── Main App ─────────────────────────────────────────────────────────────────
+export default function Home() {
+  const [categories, setCategories]   = useState(DEFAULT_CATEGORIES);
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [articles, setArticles]       = useState({});
+  const [loading, setLoading]         = useState(true);
+  const [view, setView]               = useState("feed");
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Persist categories in localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("nichenews-v2-categories");
       if (saved) setCategories(JSON.parse(saved));
     } catch (_) {}
   }, []);
@@ -485,7 +476,7 @@ tem("nichenews-v2-categories");
   };
 
   return (
-    <div style={{ minHeight: "100vh", maxWidth: 480, margin:  "0 auto", background: CB.black, position: "relative" }}>
+    <div style={{ minHeight: "100vh", maxWidth: 480, margin: "0 auto", background: CB.black, position: "relative" }}>
 
       {/* Amber glow at top (like a jazz club lamp) */}
       <div style={{
@@ -588,7 +579,7 @@ tem("nichenews-v2-categories");
                   transition: "all 0.2s ease",
                 }}
               >
-                {cat.emojh} {cat.name}
+                {cat.emoji} {cat.name}
               </button>
             );
           })}
@@ -605,7 +596,7 @@ tem("nichenews-v2-categories");
         </div>
       )}
 
-      {/* Main Content */}
+      {/* ── Main Content ── */}
       <div style={{ position: "relative", zIndex: 10 }}>
         {loading ? (
           <LoadingSkeleton />
@@ -633,7 +624,7 @@ tem("nichenews-v2-categories");
         )}
       </div>
 
-      {/* Bottom Navigation */}
+      {/* ── Bottom Navigation ── */}
       <nav style={{
         position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
         width: "100%", maxWidth: 480, zIndex: 50,
@@ -680,7 +671,7 @@ tem("nichenews-v2-categories");
         </button>
       </nav>
 
-      {/* Settings Modal */}
+      {/* ── Settings Modal ── */}
       {showSettings && (
         <SettingsModal
           categories={categories}
