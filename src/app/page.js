@@ -1,74 +1,69 @@
 "use client";
 
-import { useState, useEffect, useCallback, useContext, createContext, useMemo } from "react";
+import {
+  useState, useEffect, useCallback, useContext,
+  createContext, useMemo,
+} from "react";
 
-// ── Theme definitions ─────────────────────────────────────────────────────────
+// ── Themes (muted, sophisticated) ─────────────────────────────────────────────
 const THEME_DEFS = {
   bebop: {
-    id: "bebop", name: "Bebop", label: "🚀",
-    black: "#070608", dark1: "#0f0d0e", dark2: "#16110f",
-    amber: "#d4891a", amberLt: "#e8a838",
-    red: "#b5341e", redLt: "#cc4a2a",
-    cream: "#e8d5b0", creamDim: "#c4ad86",
-    warmGray: "#8c7a5e", dim: "#4a3e30",
-    glowRgb: "212, 137, 26",
+    id: "bebop", name: "Bebop",
+    black: "#080604", dark1: "#110e09", dark2: "#1a1510",
+    accent: "#c07830", accentLt: "#d4944a",
+    muted: "#7a5a2a", cream: "#ede0c4", creamDim: "#c4a87c",
+    warm: "#8c7050", dim: "#4a3c28", glowRgb: "192,120,48",
   },
   matrix: {
-    id: "matrix", name: "Matrix", label: "💾",
-    black: "#010c01", dark1: "#020f02", dark2: "#031503",
-    amber: "#00cc44", amberLt: "#22ee66",
-    red: "#008833", redLt: "#00aa44",
-    cream: "#b8ffb8", creamDim: "#80dd80",
-    warmGray: "#449944", dim: "#1a3a1a",
-    glowRgb: "0, 204, 68",
+    id: "matrix", name: "Forest",
+    black: "#040804", dark1: "#090f09", dark2: "#101810",
+    accent: "#4a7a40", accentLt: "#60944e",
+    muted: "#2e5226", cream: "#cce0c0", creamDim: "#90b080",
+    warm: "#587048", dim: "#243820", glowRgb: "74,122,64",
   },
   ocean: {
-    id: "ocean", name: "Ocean", label: "🌊",
-    black: "#030810", dark1: "#060e1a", dark2: "#081420",
-    amber: "#1a8acc", amberLt: "#3aaaea",
-    red: "#1a5a8c", redLt: "#2272aa",
-    cream: "#d8eef8", creamDim: "#a8cce8",
-    warmGray: "#5888aa", dim: "#2a4a66",
-    glowRgb: "26, 138, 204",
+    id: "ocean", name: "Slate",
+    black: "#040608", dark1: "#080e14", dark2: "#0e1620",
+    accent: "#3a6a90", accentLt: "#4e80aa",
+    muted: "#244e72", cream: "#c8d8ec", creamDim: "#88a8c8",
+    warm: "#446280", dim: "#1e3450", glowRgb: "58,106,144",
   },
   synthwave: {
-    id: "synthwave", name: "Synthwave", label: "🌆",
-    black: "#080514", dark1: "#0e0a1e", dark2: "#120e28",
-    amber: "#cc44cc", amberLt: "#ee66ee",
-    red: "#8833cc", redLt: "#aa44ee",
-    cream: "#f0d8f8", creamDim: "#cca8e8",
-    warmGray: "#8858aa", dim: "#443366",
-    glowRgb: "204, 68, 204",
+    id: "synthwave", name: "Dusk",
+    black: "#08040c", dark1: "#100818", dark2: "#180c22",
+    accent: "#7a4a8a", accentLt: "#9460a4",
+    muted: "#582a6a", cream: "#dcc8ec", creamDim: "#a888c8",
+    warm: "#6a4878", dim: "#3c2050", glowRgb: "122,74,138",
   },
   minimal: {
-    id: "minimal", name: "Minimal", label: "◻",
-    black: "#0a0a0a", dark1: "#111111", dark2: "#161616",
-    amber: "#e0e0e0", amberLt: "#ffffff",
-    red: "#888888", redLt: "#aaaaaa",
-    cream: "#f8f8f8", creamDim: "#cccccc",
-    warmGray: "#888888", dim: "#444444",
-    glowRgb: "224, 224, 224",
+    id: "minimal", name: "Ink",
+    black: "#080808", dark1: "#101010", dark2: "#181818",
+    accent: "#b0b0b0", accentLt: "#d8d8d8",
+    muted: "#707070", cream: "#efefef", creamDim: "#b8b8b8",
+    warm: "#888888", dim: "#404040", glowRgb: "176,176,176",
   },
 };
 
 function buildTheme(def) {
   return {
     ...def,
-    surface:  `rgba(${def.glowRgb}, 0.03)`,
-    border:   `rgba(${def.glowRgb}, 0.10)`,
-    borderMd: `rgba(${def.glowRgb}, 0.22)`,
+    surface:  `rgba(${def.glowRgb},0.04)`,
+    border:   `rgba(${def.glowRgb},0.12)`,
+    borderMd: `rgba(${def.glowRgb},0.25)`,
+    // compat aliases
+    amber: def.accent, amberLt: def.accentLt,
+    red: def.muted, warmGray: def.warm,
   };
 }
 
-// ── Theme context ─────────────────────────────────────────────────────────────
 const ThemeCtx = createContext(buildTheme(THEME_DEFS.bebop));
 const useTheme = () => useContext(ThemeCtx);
 
-// ── Niche color palette (for auto-assigning colors to new niches) ─────────────
+// ── Niche color palette ───────────────────────────────────────────────────────
 const NICHE_COLORS = [
-  "#4aa8cc", "#cc7a2e", "#b5341e", "#d4891a", "#6b9e4e",
-  "#9e4a6a", "#5c8a4a", "#4a7aaa", "#8b5c7e", "#aa6a2e",
-  "#cc4444", "#44aacc", "#cc8844", "#7744cc", "#44cc88",
+  "#c07830","#4a7a40","#3a6a90","#7a4a8a","#886050",
+  "#8a4840","#507050","#405880","#704870","#806040",
+  "#6a3838","#386868","#786040","#604878","#408858",
 ];
 function pickColor(name) {
   let h = 0;
@@ -76,27 +71,62 @@ function pickColor(name) {
   return NICHE_COLORS[Math.abs(h) % NICHE_COLORS.length];
 }
 
-// ── Default categories ────────────────────────────────────────────────────────
+// ── Default categories (multiple feeds per niche for source diversity) ─────────
 const DEFAULT_CATEGORIES = [
-  { id: "sports-nhl",  name: "Hockey",     emoji: "🏒", color: "#4aa8cc", logo: null,
-    feeds: ["https://www.nhl.com/rss/news"] },
-  { id: "sports-nfl",  name: "Football",   emoji: "🏈", color: "#cc7a2e", logo: null,
-    feeds: ["https://www.espn.com/espn/rss/nfl/news"] },
-  { id: "geopolitics", name: "World News", emoji: "🌍", color: "#b5341e", logo: null,
-    feeds: ["https://feeds.bbci.co.uk/news/world/rss.xml", "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"] },
-  { id: "anime",       name: "Anime",      emoji: "🎌", color: "#d4891a", logo: null,
-    feeds: ["https://www.animenewsnetwork.com/all/rss.xml"] },
-  { id: "tech",        name: "Tech & AI",  emoji: "🤖", color: "#6b9e4e", logo: null,
-    feeds: ["https://hnrss.org/frontpage"] },
+  {
+    id: "hockey", name: "Hockey", emoji: "🏒", color: "#4a7aaa", logo: null,
+    feeds: [
+      "https://www.nhl.com/rss/news",
+      "https://www.espn.com/espn/rss/nhl/news",
+      "https://news.google.com/rss/search?q=NHL+hockey&hl=en-US&gl=US&ceid=US:en",
+    ],
+  },
+  {
+    id: "football", name: "Football", emoji: "🏈", color: "#c07830", logo: null,
+    feeds: [
+      "https://www.espn.com/espn/rss/nfl/news",
+      "https://news.google.com/rss/search?q=NFL+football&hl=en-US&gl=US&ceid=US:en",
+    ],
+  },
+  {
+    id: "world-news", name: "World News", emoji: "🌍", color: "#7a4a4a", logo: null,
+    feeds: [
+      "https://feeds.bbci.co.uk/news/world/rss.xml",
+      "https://feeds.npr.org/1004/rss.xml",
+      "https://www.theguardian.com/world/rss",
+      "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx1YlY4U0FtVnVHZ0pWVXlnQVAB",
+    ],
+  },
+  {
+    id: "tech", name: "Tech & AI", emoji: "💻", color: "#4a7a50", logo: null,
+    feeds: [
+      "https://hnrss.org/frontpage",
+      "https://feeds.arstechnica.com/arstechnica/index",
+      "https://news.google.com/rss/search?q=artificial+intelligence+technology&hl=en-US&gl=US&ceid=US:en",
+    ],
+  },
+  {
+    id: "anime", name: "Anime", emoji: "🎌", color: "#8a4870", logo: null,
+    feeds: [
+      "https://www.animenewsnetwork.com/all/rss.xml",
+      "https://news.google.com/rss/search?q=anime+manga&hl=en-US&gl=US&ceid=US:en",
+    ],
+  },
 ];
 
 const SUGGESTED_CATEGORIES = [
-  { id: "gaming",  name: "Gaming",      emoji: "🎮", color: "#5c8a4a", logo: null, feeds: ["https://www.gamespot.com/feeds/mashup/"] },
-  { id: "science", name: "Science",     emoji: "🔬", color: "#4a7aaa", logo: null, feeds: ["https://www.sciencedaily.com/rss/all.xml"] },
-  { id: "space",   name: "Space",       emoji: "🚀", color: "#8b5c7e", logo: null, feeds: ["https://www.nasa.gov/rss/dyn/breaking_news.rss"] },
-  { id: "movies",  name: "Movies & TV", emoji: "🎬", color: "#aa6a2e", logo: null, feeds: ["https://www.ign.com/articles.rss"] },
-  { id: "music",   name: "Music",       emoji: "🎵", color: "#9e4a6a", logo: null, feeds: ["https://pitchfork.com/rss/news/"] },
-  { id: "finance", name: "Finance",     emoji: "📈", color: "#4a8a6e", logo: null, feeds: ["https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114"] },
+  { id: "gaming",  name: "Gaming",      emoji: "🎮", color: "#507050", logo: null,
+    feeds: ["https://www.gamespot.com/feeds/mashup/","https://news.google.com/rss/search?q=video+games&hl=en-US&gl=US&ceid=US:en"] },
+  { id: "science", name: "Science",     emoji: "🔬", color: "#405880", logo: null,
+    feeds: ["https://www.sciencedaily.com/rss/all.xml","https://feeds.bbci.co.uk/news/science_and_environment/rss.xml"] },
+  { id: "space",   name: "Space",       emoji: "🚀", color: "#704870", logo: null,
+    feeds: ["https://www.nasa.gov/rss/dyn/breaking_news.rss","https://news.google.com/rss/search?q=space+exploration+NASA&hl=en-US&gl=US&ceid=US:en"] },
+  { id: "movies",  name: "Movies & TV", emoji: "🎬", color: "#806040", logo: null,
+    feeds: ["https://www.ign.com/articles.rss","https://news.google.com/rss/search?q=movies+TV+shows&hl=en-US&gl=US&ceid=US:en"] },
+  { id: "music",   name: "Music",       emoji: "🎵", color: "#6a3838", logo: null,
+    feeds: ["https://pitchfork.com/rss/news/","https://news.google.com/rss/search?q=music+albums+artists&hl=en-US&gl=US&ceid=US:en"] },
+  { id: "finance", name: "Finance",     emoji: "📈", color: "#386868", logo: null,
+    feeds: ["https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114","https://news.google.com/rss/search?q=stock+market+economy&hl=en-US&gl=US&ceid=US:en"] },
 ];
 
 // ── Wikipedia logo fetcher ────────────────────────────────────────────────────
@@ -109,12 +139,9 @@ async function fetchWikiLogo(query) {
     if (!res.ok) return null;
     const data = await res.json();
     return data.thumbnail?.source || data.originalimage?.source || null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
-// ── Google News RSS for any topic ─────────────────────────────────────────────
 function googleNewsUrl(topic) {
   return `https://news.google.com/rss/search?q=${encodeURIComponent(topic)}&hl=en-US&gl=US&ceid=US:en`;
 }
@@ -131,30 +158,159 @@ function timeAgo(dateString) {
   return d < 7 ? `${d}d ago` : new Date(dateString).toLocaleDateString();
 }
 
-// ── NicheIcon: image logo or emoji fallback ────────────────────────────────────
-function NicheIcon({ category, size = 22, rounded = false }) {
+// ── NicheIcon ─────────────────────────────────────────────────────────────────
+function NicheIcon({ category, size = 22 }) {
   const [err, setErr] = useState(false);
-  const style = {
-    width: size, height: size,
-    objectFit: "contain",
-    borderRadius: rounded ? "50%" : 4,
-    display: "block",
-  };
   if (category?.logo && !err) {
     return (
-      <img src={category.logo} alt={category.name} style={style}
-        onError={() => setErr(true)} />
+      <img
+        src={category.logo} alt={category.name}
+        style={{ width: size, height: size, objectFit: "contain", borderRadius: 4, display: "block" }}
+        onError={() => setErr(true)}
+      />
     );
   }
-  return <span style={{ fontSize: size * 0.82, lineHeight: 1 }}>{category?.emoji || "📌"}</span>;
+  return <span style={{ fontSize: size * 0.8, lineHeight: 1 }}>{category?.emoji || "·"}</span>;
 }
 
-// ── Article Card ──────────────────────────────────────────────────────────────
-function ArticleCard({ article, category, index }) {
+// ── Briefing Card ─────────────────────────────────────────────────────────────
+function BriefingCard({ cat, articles }) {
+  const CB = useTheme();
+  const color = cat.color || CB.accent;
+  const uniqueSources = [...new Set(articles.map((a) => a.source))].length;
+
+  return (
+    <div className="animate-fade-in" style={{
+      borderRadius: 14, marginBottom: 14,
+      background: CB.surface,
+      border: `1px solid ${CB.border}`,
+    }}>
+      {/* Niche header */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 10,
+        padding: "13px 16px 11px",
+        borderBottom: `1px solid ${CB.border}`,
+      }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: 7,
+          background: `${color}1a`,
+          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        }}>
+          <NicheIcon category={cat} size={17} />
+        </div>
+        <div>
+          <div style={{
+            fontSize: 11, fontWeight: 800, color, letterSpacing: "0.07em",
+            textTransform: "uppercase",
+          }}>
+            {cat.name}
+          </div>
+          <div style={{ fontSize: 10, color: CB.dim, marginTop: 1 }}>
+            {articles.length} {articles.length === 1 ? "story" : "stories"}
+            {uniqueSources > 1 ? ` · ${uniqueSources} sources` : ""}
+          </div>
+        </div>
+      </div>
+
+      {/* Story rows */}
+      <div>
+        {articles.slice(0, 6).map((article, i) => (
+          <a
+            key={article.id}
+            href={article.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="press-effect"
+            style={{ display: "block", textDecoration: "none", color: "inherit" }}
+          >
+            <div style={{
+              padding: "11px 16px",
+              borderBottom: i < Math.min(articles.length, 6) - 1
+                ? `1px solid ${CB.border}` : "none",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4 }}>
+                <span style={{
+                  fontSize: 10, fontWeight: 700, color,
+                  letterSpacing: "0.04em",
+                }}>{article.source}</span>
+                <span style={{ fontSize: 10, color: CB.dim }}>·</span>
+                <span style={{ fontSize: 10, color: CB.dim }}>{timeAgo(article.pubDate)}</span>
+              </div>
+              <div style={{
+                fontSize: 14, fontWeight: 700, color: CB.cream,
+                lineHeight: 1.35,
+                marginBottom: article.quotes?.[0] ? 7 : 0,
+              }}>
+                {article.title}
+              </div>
+              {article.quotes?.[0] && (
+                <p style={{
+                  fontSize: 12, color: CB.creamDim, fontStyle: "italic",
+                  lineHeight: 1.55, margin: 0,
+                  paddingLeft: 10,
+                  borderLeft: `2px solid ${color}45`,
+                }}>
+                  &ldquo;{article.quotes[0].slice(0, 180)}&rdquo;
+                </p>
+              )}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Briefing View ─────────────────────────────────────────────────────────────
+function BriefingView({ articlesByCategory, categories }) {
+  const CB = useTheme();
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric",
+  });
+  const totalStories = Object.values(articlesByCategory).reduce((s, a) => s + a.length, 0);
+
+  return (
+    <div style={{ padding: "0 16px 120px", position: "relative", zIndex: 10 }}>
+      <div style={{ padding: "2px 2px 14px" }}>
+        <div style={{
+          fontSize: 10, color: CB.dim, fontWeight: 700,
+          letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 2,
+        }}>
+          {today}
+        </div>
+        {totalStories > 0 && (
+          <div style={{ fontSize: 12, color: CB.warm }}>
+            {totalStories} stories across {categories.length} {categories.length === 1 ? "niche" : "niches"}
+          </div>
+        )}
+      </div>
+
+      {Object.entries(articlesByCategory).map(([catId, arts]) => {
+        const cat = categories.find((c) => c.id === catId);
+        if (!cat || arts.length === 0) return null;
+        return <BriefingCard key={catId} cat={cat} articles={arts} />;
+      })}
+
+      {Object.keys(articlesByCategory).length === 0 && (
+        <div style={{ textAlign: "center", padding: "60px 20px", color: CB.dim }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: CB.creamDim, marginBottom: 6 }}>
+            Nothing loaded yet
+          </div>
+          <p style={{ fontSize: 13, color: CB.warm }}>
+            Try refreshing or add niches in Settings.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Story Card (All Stories view) ─────────────────────────────────────────────
+function StoryCard({ article, category, index }) {
   const CB = useTheme();
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgError, setImgError]   = useState(false);
-  const color = category?.color || CB.amber;
+  const [imgError,  setImgError]  = useState(false);
+  const color = category?.color || CB.accent;
 
   return (
     <a
@@ -162,167 +318,51 @@ function ArticleCard({ article, category, index }) {
       target="_blank"
       rel="noopener noreferrer"
       className="press-effect animate-fade-in block"
-      style={{ animationDelay: `${index * 0.07}s`, textDecoration: "none", color: "inherit" }}
+      style={{ animationDelay: `${index * 0.05}s`, textDecoration: "none", color: "inherit" }}
     >
-      <article style={{
-        borderRadius: 14, overflow: "hidden", marginBottom: 20,
+      <div style={{
+        borderRadius: 12, overflow: "hidden", marginBottom: 12,
         background: CB.surface, border: `1px solid ${CB.border}`,
-        transition: "border-color 0.2s ease",
       }}>
-        {/* Image */}
-        {article.image && !imgError ? (
-          <div style={{ position: "relative", height: 190, background: CB.dark2 }}>
-            <img
-              src={article.image} alt=""
+        {article.image && !imgError && (
+          <div style={{ position: "relative", height: 150, background: CB.dark2 }}>
+            <img src={article.image} alt=""
               style={{ width: "100%", height: "100%", objectFit: "cover", display: "block",
-                opacity: imgLoaded ? 1 : 0, transition: "opacity 0.5s ease" }}
-              onLoad={() => setImgLoaded(true)}
-              onError={() => setImgError(true)}
-            />
+                opacity: imgLoaded ? 1 : 0, transition: "opacity 0.4s ease" }}
+              onLoad={() => setImgLoaded(true)} onError={() => setImgError(true)} />
             {!imgLoaded && <div className="skeleton" style={{ position: "absolute", inset: 0 }} />}
-            <div style={{
-              position: "absolute", bottom: 0, left: 0, right: 0, height: 80,
-              background: `linear-gradient(transparent, ${CB.dark2})`,
-            }} />
-          </div>
-        ) : (
-          <div style={{
-            height: 60, display: "flex", alignItems: "center", justifyContent: "center",
-            background: `${color}12`, borderBottom: `1px solid ${CB.border}`,
-          }}>
-            <NicheIcon category={category} size={32} />
+            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 50,
+              background: `linear-gradient(transparent, ${CB.dark2})` }} />
           </div>
         )}
-
-        {/* Body */}
-        <div style={{ padding: "14px 18px 18px" }}>
-          {/* Meta */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+        <div style={{ padding: "12px 16px 14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 7 }}>
             <span style={{
-              display: "flex", alignItems: "center", gap: 5,
-              fontSize: 10, fontWeight: 800, letterSpacing: "0.1em",
+              display: "flex", alignItems: "center", gap: 4,
+              fontSize: 10, fontWeight: 700, letterSpacing: "0.06em",
               textTransform: "uppercase", color,
             }}>
-              <NicheIcon category={category} size={14} />
+              <NicheIcon category={category} size={12} />
               {category?.name}
             </span>
-            <span style={{ width: 3, height: 3, borderRadius: "50%", background: CB.dim }} />
-            <span style={{ fontSize: 11, color: CB.warmGray, fontWeight: 500 }}>{article.source}</span>
-            <span style={{ fontSize: 11, color: CB.dim, marginLeft: "auto" }}>{timeAgo(article.pubDate)}</span>
+            <span style={{ width: 2, height: 2, borderRadius: "50%", background: CB.dim }} />
+            <span style={{ fontSize: 10, color: CB.warm }}>{article.source}</span>
+            <span style={{ fontSize: 10, color: CB.dim, marginLeft: "auto" }}>{timeAgo(article.pubDate)}</span>
           </div>
-
-          {/* Headline */}
-          <h3 style={{
-            fontSize: 16, fontWeight: 800, lineHeight: 1.3, color: CB.cream,
-            marginBottom: 10, letterSpacing: "-0.01em",
-          }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: CB.cream, lineHeight: 1.35, marginBottom: 7 }}>
             {article.title}
-          </h3>
-
-          {/* Summary */}
-          {article.summary && (
-            <p style={{ fontSize: 13, lineHeight: 1.6, color: CB.warmGray, marginBottom: 12 }}>
-              {article.summary}
+          </div>
+          {article.quotes?.[0] && (
+            <p style={{
+              fontSize: 12, fontStyle: "italic", color: CB.creamDim, lineHeight: 1.5,
+              paddingLeft: 10, borderLeft: `2px solid ${color}45`, margin: 0,
+            }}>
+              &ldquo;{article.quotes[0].slice(0, 140)}&rdquo;
             </p>
           )}
-
-          {/* Pull quote */}
-          {article.quotes?.length > 0 && article.quotes.map((quote, qi) => (
-            <blockquote key={qi} style={{
-              margin: "12px 0 0", paddingLeft: 14,
-              borderLeft: `3px solid ${color}`,
-              color: CB.creamDim, fontSize: 13, lineHeight: 1.65,
-              fontStyle: "italic", letterSpacing: "0.005em",
-            }}>
-              &ldquo;{quote}&rdquo;
-            </blockquote>
-          ))}
-
-          <div style={{
-            marginTop: 14, display: "flex", alignItems: "center", gap: 6,
-            fontSize: 11, fontWeight: 700, letterSpacing: "0.06em",
-            textTransform: "uppercase", color: CB.warmGray,
-          }}>
-            Read full article <span style={{ fontSize: 12 }}>→</span>
-          </div>
         </div>
-      </article>
-    </a>
-  );
-}
-
-// ── Digest View ───────────────────────────────────────────────────────────────
-function DigestView({ articlesByCategory, categories }) {
-  const CB = useTheme();
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long", month: "long", day: "numeric", year: "numeric",
-  });
-  const totalArticles = Object.values(articlesByCategory).reduce((s, a) => s + a.length, 0);
-
-  return (
-    <div style={{ padding: "0 20px 120px", position: "relative", zIndex: 10 }}>
-      <div className="animate-fade-in" style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 900, color: CB.cream, marginBottom: 4, letterSpacing: "-0.02em" }}>
-          ☀️ Daily Digest
-        </h2>
-        <p style={{ fontSize: 13, color: CB.warmGray }}>{today} — {totalArticles} stories</p>
       </div>
-
-      {Object.entries(articlesByCategory).map(([catId, arts]) => {
-        const cat = categories.find((c) => c.id === catId);
-        if (!cat || arts.length === 0) return null;
-        return (
-          <div key={catId} className="animate-fade-in" style={{
-            borderRadius: 14, background: CB.surface,
-            border: `1px solid ${CB.border}`, padding: "16px 18px", marginBottom: 16,
-          }}>
-            <div style={{
-              display: "flex", alignItems: "center", gap: 10, marginBottom: 14,
-              paddingBottom: 12, borderBottom: `1px solid ${cat.color}25`,
-            }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: 8,
-                background: `${cat.color}18`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <NicheIcon category={cat} size={20} />
-              </div>
-              <span style={{ fontSize: 15, fontWeight: 800, color: cat.color, letterSpacing: "-0.01em" }}>
-                {cat.name}
-              </span>
-              <span style={{ marginLeft: "auto", fontSize: 11, color: CB.warmGray, fontWeight: 600 }}>
-                {arts.length} {arts.length === 1 ? "story" : "stories"}
-              </span>
-            </div>
-
-            {arts.slice(0, 5).map((article, i) => (
-              <a key={article.id} href={article.link} target="_blank" rel="noopener noreferrer"
-                style={{
-                  display: "block", padding: "10px 0",
-                  borderBottom: i < Math.min(arts.length, 5) - 1 ? `1px solid ${CB.border}` : "none",
-                  textDecoration: "none", color: "inherit",
-                }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: CB.cream, marginBottom: 3, lineHeight: 1.35 }}>
-                  {article.title}
-                </div>
-                {article.quotes?.[0] && (
-                  <p style={{
-                    fontSize: 12, color: CB.warmGray, fontStyle: "italic",
-                    marginBottom: 3, lineHeight: 1.5,
-                    paddingLeft: 8, borderLeft: `2px solid ${cat.color}60`, marginTop: 5,
-                  }}>
-                    &ldquo;{article.quotes[0].slice(0, 140)}…&rdquo;
-                  </p>
-                )}
-                <div style={{ fontSize: 11, color: CB.dim, marginTop: 4 }}>
-                  {article.source} · {timeAgo(article.pubDate)}
-                </div>
-              </a>
-            ))}
-          </div>
-        );
-      })}
-    </div>
+    </a>
   );
 }
 
@@ -331,33 +371,35 @@ function ThemePicker({ current, onChange }) {
   const CB = useTheme();
   return (
     <div>
-      <p style={{ fontSize: 10, fontWeight: 800, color: CB.dim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12 }}>
-        App Theme
+      <p style={{
+        fontSize: 10, fontWeight: 800, color: CB.dim,
+        letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10,
+      }}>
+        Appearance
       </p>
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         {Object.values(THEME_DEFS).map((t) => {
           const isActive = current === t.id;
           return (
-            <button
-              key={t.id}
-              onClick={() => onChange(t.id)}
-              title={t.name}
+            <button key={t.id} onClick={() => onChange(t.id)}
               style={{
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-                padding: "10px 14px", borderRadius: 12, cursor: "pointer",
-                background: isActive ? `${t.amber}18` : "rgba(255,255,255,0.03)",
-                border: `2px solid ${isActive ? t.amber : "rgba(255,255,255,0.08)"}`,
+                padding: "10px 14px", borderRadius: 10, cursor: "pointer",
+                background: isActive ? `${t.accent}18` : "rgba(255,255,255,0.03)",
+                border: `1.5px solid ${isActive ? t.accent : "rgba(255,255,255,0.07)"}`,
                 transition: "all 0.2s ease",
               }}
             >
-              {/* Color swatch */}
               <div style={{ display: "flex", gap: 3 }}>
-                {[t.amber, t.red, t.cream].map((c) => (
-                  <div key={c} style={{ width: 10, height: 10, borderRadius: "50%", background: c }} />
+                {[t.accent, t.muted, t.cream].map((c, ci) => (
+                  <div key={ci} style={{ width: 9, height: 9, borderRadius: "50%", background: c }} />
                 ))}
               </div>
-              <span style={{ fontSize: 11, fontWeight: 700, color: isActive ? t.amber : "#888", whiteSpace: "nowrap" }}>
-                {t.label} {t.name}
+              <span style={{
+                fontSize: 11, fontWeight: 700,
+                color: isActive ? t.accent : "#666", whiteSpace: "nowrap",
+              }}>
+                {t.name}
               </span>
             </button>
           );
@@ -370,48 +412,43 @@ function ThemePicker({ current, onChange }) {
 // ── Settings Modal ────────────────────────────────────────────────────────────
 function SettingsModal({ categories, suggested, onClose, onRemove, onAdd, themeName, onThemeChange }) {
   const CB = useTheme();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searching, setSearching]     = useState(false);
-  const [searchMsg, setSearchMsg]     = useState("");
+  const [query,   setQuery]   = useState("");
+  const [adding,  setAdding]  = useState(false);
+  const [msg,     setMsg]     = useState("");
 
   const inputStyle = {
     padding: "10px 14px", borderRadius: 10, fontSize: 13,
     background: "rgba(255,255,255,0.05)", border: `1px solid ${CB.border}`,
-    color: CB.cream, outline: "none", width: "100%",
-    boxSizing: "border-box",
+    color: CB.cream, outline: "none", width: "100%", boxSizing: "border-box",
   };
 
-  async function handleAddBySearch() {
-    const q = searchQuery.trim();
+  async function handleAdd() {
+    const q = query.trim();
     if (!q) return;
-    setSearching(true);
-    setSearchMsg("Searching…");
-
-    // Auto-fetch Wikipedia logo
+    setAdding(true);
+    setMsg("Finding…");
     const logo = await fetchWikiLogo(q);
-
     const niche = {
-      id:    q.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
-      name:  q,
-      emoji: "📌",
-      color: pickColor(q),
+      id:     q.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
+      name:   q,
+      emoji:  "·",
+      color:  pickColor(q),
       logo,
-      feeds: [googleNewsUrl(q)],
+      feeds:  [googleNewsUrl(q)],
       custom: true,
     };
-
     onAdd(niche);
-    setSearchQuery("");
-    setSearchMsg(logo ? `✓ Added "${q}" with logo` : `✓ Added "${q}"`);
-    setSearching(false);
-    setTimeout(() => setSearchMsg(""), 3000);
+    setQuery("");
+    setMsg(logo ? `Added "${q}" with logo` : `Added "${q}"`);
+    setAdding(false);
+    setTimeout(() => setMsg(""), 3000);
   }
 
   return (
     <div
       style={{
-        position: "fixed", inset: 0, background: "rgba(7,6,8,0.85)",
-        backdropFilter: "blur(12px)", zIndex: 100,
+        position: "fixed", inset: 0, background: "rgba(4,3,2,0.88)",
+        backdropFilter: "blur(14px)", zIndex: 100,
         display: "flex", alignItems: "flex-end", justifyContent: "center",
       }}
       onClick={onClose}
@@ -420,119 +457,114 @@ function SettingsModal({ categories, suggested, onClose, onRemove, onAdd, themeN
         className="animate-slide-up"
         style={{
           background: `linear-gradient(180deg, ${CB.dark2}, ${CB.dark1})`,
-          borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 480,
+          borderRadius: "18px 18px 0 0", width: "100%", maxWidth: 480,
           maxHeight: "92vh", overflowY: "auto",
-          padding: "24px 22px 48px",
+          padding: "20px 20px 48px",
           border: `1px solid ${CB.borderMd}`, borderBottom: "none",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Handle */}
-        <div style={{ width: 40, height: 4, borderRadius: 2, background: CB.dim, margin: "0 auto 22px" }} />
+        <div style={{ width: 34, height: 4, borderRadius: 2, background: CB.dim, margin: "0 auto 20px" }} />
 
-        <h2 style={{ fontSize: 20, fontWeight: 900, color: CB.cream, marginBottom: 4, letterSpacing: "-0.02em" }}>
+        <h2 style={{ fontSize: 18, fontWeight: 800, color: CB.cream, marginBottom: 4, letterSpacing: "-0.02em" }}>
           Settings
         </h2>
-        <p style={{ fontSize: 13, color: CB.warmGray, marginBottom: 28 }}>
-          Customize your feed and appearance
+        <p style={{ fontSize: 12, color: CB.warm, marginBottom: 22 }}>
+          Customize your briefing and appearance
         </p>
 
-        {/* Theme picker */}
         <ThemePicker current={themeName} onChange={onThemeChange} />
 
-        <div style={{ height: 1, background: CB.border, margin: "24px 0" }} />
+        <div style={{ height: 1, background: CB.border, margin: "20px 0" }} />
 
-        {/* Search & Add niche */}
-        <p style={{ fontSize: 10, fontWeight: 800, color: CB.dim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
+        {/* Add niche */}
+        <p style={{ fontSize: 10, fontWeight: 800, color: CB.dim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
           Add a Niche
         </p>
-        <p style={{ fontSize: 12, color: CB.warmGray, marginBottom: 12 }}>
-          Type anything — a team, topic, person, or interest. We&apos;ll find the news and logo automatically.
+        <p style={{ fontSize: 12, color: CB.warm, marginBottom: 10 }}>
+          Type any team, topic, or interest — we&apos;ll find the news and logo automatically.
         </p>
         <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
           <input
             style={{ ...inputStyle, flex: 1 }}
             placeholder="e.g. Buffalo Sabres, Formula 1, Taylor Swift…"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAddBySearch()}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
           />
           <button
-            onClick={handleAddBySearch}
-            disabled={searching || !searchQuery.trim()}
+            onClick={handleAdd}
+            disabled={adding || !query.trim()}
             style={{
-              padding: "10px 16px", borderRadius: 10, cursor: searching ? "default" : "pointer",
-              background: `${CB.amber}22`, border: `1px solid ${CB.amber}44`,
-              color: CB.amberLt, fontSize: 13, fontWeight: 700, whiteSpace: "nowrap",
-              opacity: searching || !searchQuery.trim() ? 0.5 : 1,
+              padding: "10px 16px", borderRadius: 10,
+              cursor: adding || !query.trim() ? "default" : "pointer",
+              background: `${CB.accent}20`, border: `1px solid ${CB.accent}40`,
+              color: CB.accentLt, fontSize: 13, fontWeight: 700, whiteSpace: "nowrap",
+              opacity: adding || !query.trim() ? 0.45 : 1,
             }}
           >
-            {searching ? "…" : "Add"}
+            {adding ? "…" : "Add"}
           </button>
         </div>
-        {searchMsg && (
-          <p style={{ fontSize: 12, color: CB.amber, marginBottom: 8 }}>{searchMsg}</p>
-        )}
+        {msg && <p style={{ fontSize: 12, color: CB.accent, marginBottom: 8 }}>{msg}</p>}
 
-        <div style={{ height: 1, background: CB.border, margin: "24px 0" }} />
+        <div style={{ height: 1, background: CB.border, margin: "20px 0" }} />
 
-        {/* Current niches */}
-        <p style={{ fontSize: 10, fontWeight: 800, color: CB.dim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12 }}>
+        {/* Your niches */}
+        <p style={{ fontSize: 10, fontWeight: 800, color: CB.dim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
           Your Niches
         </p>
         {categories.map((cat) => (
           <div key={cat.id} style={{
-            display: "flex", alignItems: "center", gap: 12, padding: "11px 14px",
-            borderRadius: 12, background: CB.surface, border: `1px solid ${CB.border}`, marginBottom: 8,
+            display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
+            borderRadius: 10, background: CB.surface, border: `1px solid ${CB.border}`, marginBottom: 6,
           }}>
             <div style={{
-              width: 38, height: 38, borderRadius: 10, background: `${cat.color}15`,
+              width: 32, height: 32, borderRadius: 8, background: `${cat.color}18`,
               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
-              <NicheIcon category={cat} size={22} />
+              <NicheIcon category={cat} size={20} />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: CB.cream }}>{cat.name}</div>
-              {cat.custom && (
-                <div style={{ fontSize: 10, color: CB.dim, marginTop: 1 }}>Custom niche</div>
-              )}
+              {cat.custom && <div style={{ fontSize: 10, color: CB.dim, marginTop: 1 }}>Custom</div>}
             </div>
             <button
               onClick={() => onRemove(cat.id)}
               style={{
-                width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-                background: "rgba(181,52,30,0.12)", border: "1px solid rgba(181,52,30,0.25)",
-                color: CB.red, cursor: "pointer", fontSize: 18, fontWeight: 800,
+                width: 28, height: 28, borderRadius: 7, flexShrink: 0,
+                background: "rgba(160,60,40,0.10)", border: "1px solid rgba(160,60,40,0.22)",
+                color: "#a03828", cursor: "pointer", fontSize: 16, fontWeight: 700,
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}
             >×</button>
           </div>
         ))}
 
-        {/* Suggested niches */}
+        {/* Suggested */}
         {suggested.length > 0 && (
           <>
-            <p style={{ fontSize: 10, fontWeight: 800, color: CB.dim, letterSpacing: "0.1em", textTransform: "uppercase", margin: "22px 0 12px" }}>
+            <p style={{ fontSize: 10, fontWeight: 800, color: CB.dim, letterSpacing: "0.1em", textTransform: "uppercase", margin: "18px 0 10px" }}>
               Suggested
             </p>
             {suggested.map((cat) => (
               <div key={cat.id} style={{
-                display: "flex", alignItems: "center", gap: 12, padding: "11px 14px",
-                borderRadius: 12, background: CB.surface, border: `1px solid ${CB.border}`, marginBottom: 8,
+                display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
+                borderRadius: 10, background: CB.surface, border: `1px solid ${CB.border}`, marginBottom: 6,
               }}>
                 <div style={{
-                  width: 38, height: 38, borderRadius: 10, background: `${cat.color}15`,
+                  width: 32, height: 32, borderRadius: 8, background: `${cat.color}18`,
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
-                  <NicheIcon category={cat} size={22} />
+                  <NicheIcon category={cat} size={20} />
                 </div>
                 <span style={{ fontSize: 14, fontWeight: 700, color: CB.cream, flex: 1 }}>{cat.name}</span>
                 <button
                   onClick={() => onAdd(cat)}
                   style={{
-                    width: 30, height: 30, borderRadius: 8,
-                    background: "rgba(107,158,78,0.12)", border: "1px solid rgba(107,158,78,0.25)",
-                    color: "#6b9e4e", cursor: "pointer", fontSize: 20, fontWeight: 800,
+                    width: 28, height: 28, borderRadius: 7,
+                    background: "rgba(60,120,60,0.10)", border: "1px solid rgba(60,120,60,0.22)",
+                    color: "#3c7840", cursor: "pointer", fontSize: 18, fontWeight: 700,
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}
                 >+</button>
@@ -549,18 +581,24 @@ function SettingsModal({ categories, suggested, onClose, onRemove, onAdd, themeN
 function LoadingSkeleton() {
   const CB = useTheme();
   return (
-    <div style={{ padding: "0 20px 120px" }}>
+    <div style={{ padding: "0 16px 120px" }}>
+      <div style={{ padding: "2px 2px 14px" }}>
+        <div className="skeleton" style={{ height: 9, width: "38%", borderRadius: 4, marginBottom: 7 }} />
+        <div className="skeleton" style={{ height: 11, width: "55%", borderRadius: 4 }} />
+      </div>
       {[1, 2, 3].map((i) => (
-        <div key={i} style={{ borderRadius: 14, overflow: "hidden", marginBottom: 20, border: `1px solid ${CB.border}` }}>
-          <div className="skeleton" style={{ height: 190 }} />
-          <div style={{ padding: "14px 18px 18px" }}>
-            <div className="skeleton" style={{ height: 10, width: "30%", borderRadius: 6, marginBottom: 12 }} />
-            <div className="skeleton" style={{ height: 16, width: "90%", borderRadius: 6, marginBottom: 8 }} />
-            <div className="skeleton" style={{ height: 16, width: "70%", borderRadius: 6, marginBottom: 14 }} />
-            <div className="skeleton" style={{ height: 13, width: "100%", borderRadius: 6, marginBottom: 6 }} />
-            <div className="skeleton" style={{ height: 13, width: "80%", borderRadius: 6, marginBottom: 14 }} />
-            <div className="skeleton" style={{ height: 40, borderRadius: 6, borderLeft: `3px solid ${CB.amber}30` }} />
+        <div key={i} style={{ borderRadius: 14, overflow: "hidden", marginBottom: 14, border: `1px solid ${CB.border}` }}>
+          <div style={{ padding: "13px 16px 11px", borderBottom: `1px solid ${CB.border}` }}>
+            <div className="skeleton" style={{ height: 9, width: "22%", borderRadius: 4, marginBottom: 6 }} />
+            <div className="skeleton" style={{ height: 8, width: "32%", borderRadius: 4 }} />
           </div>
+          {[1, 2, 3, 4].map((j) => (
+            <div key={j} style={{ padding: "11px 16px", borderBottom: j < 4 ? `1px solid ${CB.border}` : "none" }}>
+              <div className="skeleton" style={{ height: 8, width: "18%", borderRadius: 4, marginBottom: 6 }} />
+              <div className="skeleton" style={{ height: 13, width: "92%", borderRadius: 4, marginBottom: 4 }} />
+              <div className="skeleton" style={{ height: 13, width: "68%", borderRadius: 4 }} />
+            </div>
+          ))}
         </div>
       ))}
     </div>
@@ -572,85 +610,85 @@ export default function Home() {
   const [themeName, setThemeName] = useState("bebop");
   const CB = useMemo(() => buildTheme(THEME_DEFS[themeName] || THEME_DEFS.bebop), [themeName]);
 
-  const [categories, setCategories]         = useState(DEFAULT_CATEGORIES);
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [articles, setArticles]             = useState({});
-  const [loading, setLoading]               = useState(true);
-  const [view, setView]                     = useState("feed");
-  const [showSettings, setShowSettings]     = useState(false);
+  const [categories,    setCategories]    = useState(DEFAULT_CATEGORIES);
+  const [articles,      setArticles]      = useState({});
+  const [loading,       setLoading]       = useState(true);
+  const [view,          setView]          = useState("briefing");
+  const [showSettings,  setShowSettings]  = useState(false);
 
-  // Persist to localStorage
+  // ── Persistence — fixed: don't save until after the initial load ────────────
+  const [initialized, setInitialized] = useState(false);
+
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("nichenews-v3-categories");
-      if (saved) setCategories(JSON.parse(saved));
-      const savedTheme = localStorage.getItem("nichenews-v3-theme");
+      // Migrate from v3 → v4 if needed
+      const raw = localStorage.getItem("nichenews-v4-categories")
+               || localStorage.getItem("nichenews-v3-categories");
+      if (raw) setCategories(JSON.parse(raw));
+
+      const savedTheme = localStorage.getItem("nichenews-v4-theme")
+                      || localStorage.getItem("nichenews-v3-theme");
       if (savedTheme && THEME_DEFS[savedTheme]) setThemeName(savedTheme);
-    } catch (_) {}
+    } catch {}
+    setInitialized(true);
   }, []);
 
   useEffect(() => {
-    try { localStorage.setItem("nichenews-v3-categories", JSON.stringify(categories)); }
-    catch (_) {}
-  }, [categories]);
+    if (!initialized) return;
+    try { localStorage.setItem("nichenews-v4-categories", JSON.stringify(categories)); }
+    catch {}
+  }, [categories, initialized]);
 
   useEffect(() => {
-    try { localStorage.setItem("nichenews-v3-theme", themeName); }
-    catch (_) {}
-  }, [themeName]);
+    if (!initialized) return;
+    try { localStorage.setItem("nichenews-v4-theme", themeName); }
+    catch {}
+  }, [themeName, initialized]);
 
-  // Auto-fetch Wikipedia logos for categories that don't have one
+  // ── Auto-fetch missing logos (mount only) ──────────────────────────────────
   useEffect(() => {
-    const missing = categories.filter((c) => !c.logo);
-    if (missing.length === 0) return;
-    missing.forEach(async (cat) => {
+    categories.forEach(async (cat) => {
+      if (cat.logo) return;
       const logo = await fetchWikiLogo(cat.name);
-      if (logo) {
-        setCategories((prev) =>
-          prev.map((c) => c.id === cat.id ? { ...c, logo } : c)
-        );
-      }
+      if (logo) setCategories((prev) => prev.map((c) => c.id === cat.id ? { ...c, logo } : c));
     });
-  }, []); // only on mount
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Fetch feeds
+  // ── Fetch feeds ────────────────────────────────────────────────────────────
   const fetchAll = useCallback(async () => {
     setLoading(true);
     const results = {};
-    await Promise.all(categories.map(async (cat) => {
-      if (!cat.feeds?.length) return;
-      try {
-        const res = await fetch(`/api/feeds?urls=${encodeURIComponent(cat.feeds.join(","))}&categoryId=${cat.id}`);
-        const data = await res.json();
-        results[cat.id] = data.articles || [];
-      } catch (_) { results[cat.id] = []; }
-    }));
+    await Promise.all(
+      categories.map(async (cat) => {
+        if (!cat.feeds?.length) return;
+        try {
+          const res  = await fetch(`/api/feeds?urls=${encodeURIComponent(cat.feeds.join(","))}&categoryId=${cat.id}`);
+          const data = await res.json();
+          results[cat.id] = data.articles || [];
+        } catch { results[cat.id] = []; }
+      })
+    );
     setArticles(results);
     setLoading(false);
   }, [categories]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // Derived state
+  // ── Derived ────────────────────────────────────────────────────────────────
   const allArticles = Object.values(articles).flat()
     .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-  const filteredArticles = activeCategory === "all" ? allArticles : (articles[activeCategory] || []);
   const suggested = SUGGESTED_CATEGORIES.filter((s) => !categories.find((c) => c.id === s.id));
 
-  const handleRemove = (id) => {
-    setCategories((p) => p.filter((c) => c.id !== id));
-    if (activeCategory === id) setActiveCategory("all");
-  };
+  const handleRemove = (id) => setCategories((p) => p.filter((c) => c.id !== id));
 
   const handleAdd = async (cat) => {
     if (categories.find((c) => c.id === cat.id)) return;
-    // If it's a suggested category without a logo, fetch one
-    const withLogo = cat.logo ? cat : { ...cat };
-    if (!withLogo.logo) {
+    const item = { ...cat };
+    if (!item.logo) {
       const logo = await fetchWikiLogo(cat.name);
-      if (logo) withLogo.logo = logo;
+      if (logo) item.logo = logo;
     }
-    setCategories((p) => [...p, withLogo]);
+    setCategories((p) => [...p, item]);
   };
 
   return (
@@ -661,115 +699,81 @@ export default function Home() {
       }}>
         {/* Ambient glow */}
         <div style={{
-          position: "fixed", top: -60, left: "50%", transform: "translateX(-50%)",
-          width: 320, height: 320, borderRadius: "50%", pointerEvents: "none", zIndex: 0,
-          background: `radial-gradient(circle, rgba(${CB.glowRgb},0.09) 0%, transparent 70%)`,
+          position: "fixed", top: -80, left: "50%", transform: "translateX(-50%)",
+          width: 340, height: 340, borderRadius: "50%", pointerEvents: "none", zIndex: 0,
+          background: `radial-gradient(circle, rgba(${CB.glowRgb},0.07) 0%, transparent 70%)`,
         }} />
 
-        {/* ── Header ── */}
+        {/* ── Header ────────────────────────────────────────────────────── */}
         <header style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "18px 20px 10px", position: "relative", zIndex: 10,
+          padding: "16px 18px 10px", position: "relative", zIndex: 10,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {/* NN monogram */}
             <div style={{
-              width: 38, height: 38, borderRadius: 10,
-              background: `linear-gradient(135deg, ${CB.amber}, ${CB.red})`,
+              width: 34, height: 34, borderRadius: 9,
+              background: `linear-gradient(135deg, ${CB.dark2}, ${CB.black})`,
+              border: `1.5px solid ${CB.borderMd}`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 20, boxShadow: `0 4px 20px rgba(${CB.glowRgb},0.3)`,
-            }}>⚡</div>
+              boxShadow: `0 2px 14px rgba(${CB.glowRgb},0.18)`,
+            }}>
+              <span style={{
+                fontSize: 12, fontWeight: 900, color: CB.accent,
+                letterSpacing: "-0.04em", lineHeight: 1,
+              }}>NN</span>
+            </div>
             <div>
               <div style={{
-                fontSize: 18, fontWeight: 900, letterSpacing: "-0.03em", color: CB.cream,
-                lineHeight: 1.1, textTransform: "uppercase",
+                fontSize: 15, fontWeight: 900, letterSpacing: "-0.03em",
+                color: CB.cream, lineHeight: 1.1, textTransform: "uppercase",
               }}>NicheNews</div>
-              <div style={{ fontSize: 9, color: CB.dim, letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 700 }}>
+              <div style={{
+                fontSize: 8, color: CB.dim, letterSpacing: "0.14em",
+                textTransform: "uppercase", fontWeight: 700,
+              }}>
                 Your Signal · No Noise
               </div>
             </div>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={fetchAll} title="Refresh" style={{
-              width: 36, height: 36, borderRadius: 10, border: `1px solid ${CB.border}`,
-              background: CB.surface, color: CB.warmGray, cursor: "pointer", fontSize: 15,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>🔄</button>
-            <button onClick={() => setShowSettings(true)} title="Settings" style={{
-              width: 36, height: 36, borderRadius: 10, border: `1px solid ${CB.border}`,
-              background: CB.surface, color: CB.warmGray, cursor: "pointer", fontSize: 16,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>⚙</button>
-          </div>
-        </header>
 
-        {/* ── Digest Banner ── */}
-        {view === "feed" && !loading && allArticles.length > 0 && (
-          <div
-            className="animate-fade-in press-effect"
-            onClick={() => setView("digest")}
-            style={{
-              margin: "4px 20px 16px", padding: "14px 16px", borderRadius: 12,
-              background: `linear-gradient(135deg, rgba(${CB.glowRgb},0.08), rgba(${CB.glowRgb},0.03))`,
-              border: `1px solid ${CB.borderMd}`, cursor: "pointer", position: "relative", zIndex: 10,
-            }}
-          >
-            <div style={{ fontSize: 14, fontWeight: 800, color: CB.cream, marginBottom: 3, display: "flex", alignItems: "center", gap: 8 }}>
-              <span>📋</span> Daily Digest Ready
-            </div>
-            <div style={{ fontSize: 12, color: CB.warmGray }}>
-              {allArticles.length} stories across {categories.length} niches — tap to read
-            </div>
-          </div>
-        )}
-
-        {/* ── Category Pills ── */}
-        {view === "feed" && (
-          <div style={{
-            display: "flex", gap: 8, padding: "4px 20px 12px",
-            overflowX: "auto", position: "relative", zIndex: 10,
-          }}>
-            {[{ id: "all", name: "All", emoji: "🌐", color: CB.amber, logo: null }, ...categories].map((cat) => {
-              const isActive = activeCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveCategory(cat.id)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    padding: "7px 14px", borderRadius: 20,
-                    background: isActive ? `${cat.color}18` : CB.surface,
-                    border: `1.5px solid ${isActive ? cat.color : CB.border}`,
-                    color: isActive ? cat.color : CB.warmGray,
-                    fontSize: 12, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer",
-                    boxShadow: isActive ? `0 2px 12px ${cat.color}18` : "none",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  <NicheIcon category={cat} size={14} />
-                  {cat.name}
-                </button>
-              );
-            })}
+          <div style={{ display: "flex", gap: 6 }}>
+            <button
+              onClick={fetchAll}
+              style={{
+                height: 30, padding: "0 11px", borderRadius: 8,
+                border: `1px solid ${CB.border}`,
+                background: CB.surface, color: CB.warm, cursor: "pointer",
+                fontSize: 11, fontWeight: 700, letterSpacing: "0.03em",
+              }}
+            >
+              Refresh
+            </button>
             <button
               onClick={() => setShowSettings(true)}
               style={{
-                padding: "7px 14px", borderRadius: 20, whiteSpace: "nowrap",
-                border: `1.5px dashed ${CB.dim}`, background: "transparent",
-                color: CB.dim, fontSize: 12, fontWeight: 700, cursor: "pointer",
+                height: 30, padding: "0 11px", borderRadius: 8,
+                border: `1px solid ${CB.border}`,
+                background: CB.surface, color: CB.warm, cursor: "pointer",
+                fontSize: 11, fontWeight: 700, letterSpacing: "0.03em",
               }}
-            >+ Add</button>
+            >
+              Settings
+            </button>
           </div>
-        )}
+        </header>
 
-        {/* ── Main Content ── */}
+        {/* ── Main Content ──────────────────────────────────────────────── */}
         <div style={{ position: "relative", zIndex: 10 }}>
           {loading ? (
             <LoadingSkeleton />
-          ) : view === "feed" ? (
-            <div style={{ padding: "4px 20px 120px" }}>
-              {filteredArticles.length > 0 ? (
-                filteredArticles.map((article, i) => (
-                  <ArticleCard
+          ) : view === "briefing" ? (
+            <BriefingView articlesByCategory={articles} categories={categories} />
+          ) : (
+            <div style={{ padding: "4px 16px 120px" }}>
+              {allArticles.length > 0 ? (
+                allArticles.map((article, i) => (
+                  <StoryCard
                     key={article.id}
                     article={article}
                     category={categories.find((c) => c.id === article.categoryId)}
@@ -777,59 +781,62 @@ export default function Home() {
                   />
                 ))
               ) : (
-                <div style={{ textAlign: "center", padding: "64px 20px", color: CB.warmGray }}>
-                  <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: CB.creamDim }}>Nothing here yet</div>
-                  <p style={{ fontSize: 13, marginTop: 8, color: CB.warmGray }}>Try refreshing or adding more niches.</p>
+                <div style={{ textAlign: "center", padding: "64px 20px" }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: CB.creamDim, marginBottom: 6 }}>
+                    No stories yet
+                  </div>
+                  <p style={{ fontSize: 13, color: CB.warm }}>
+                    Try refreshing or add niches in Settings.
+                  </p>
                 </div>
               )}
             </div>
-          ) : (
-            <DigestView articlesByCategory={articles} categories={categories} />
           )}
         </div>
 
-        {/* ── Bottom Navigation ── */}
+        {/* ── Bottom Navigation ─────────────────────────────────────────── */}
         <nav style={{
           position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
           width: "100%", maxWidth: 480, zIndex: 50,
-          background: `linear-gradient(180deg, transparent, ${CB.black} 28%)`,
+          background: `linear-gradient(180deg, transparent, ${CB.black} 32%)`,
           display: "flex", justifyContent: "center", gap: 4,
-          padding: "14px 20px 22px",
+          padding: "16px 20px 24px",
         }}>
           {[
-            { key: "feed",   emoji: "📰", label: "Feed" },
-            { key: "digest", emoji: "📋", label: "Digest" },
-          ].map(({ key, emoji, label }) => {
+            { key: "briefing",  label: "Briefing" },
+            { key: "stories",   label: "All Stories" },
+          ].map(({ key, label }) => {
             const isActive = view === key;
             return (
-              <button key={key} onClick={() => setView(key)} style={{
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-                padding: "8px 22px", borderRadius: 14, cursor: "pointer",
-                background: isActive ? `rgba(${CB.glowRgb},0.08)` : "transparent",
-                border: `1px solid ${isActive ? CB.borderMd : "transparent"}`,
-                color: isActive ? CB.amberLt : CB.dim,
-                fontSize: 10, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase",
-                transition: "all 0.2s ease",
-              }}>
-                <span style={{ fontSize: 20 }}>{emoji}</span>
+              <button
+                key={key}
+                onClick={() => setView(key)}
+                style={{
+                  padding: "7px 18px", borderRadius: 20, cursor: "pointer",
+                  background: isActive ? `rgba(${CB.glowRgb},0.10)` : "transparent",
+                  border: `1px solid ${isActive ? CB.borderMd : "transparent"}`,
+                  color: isActive ? CB.accentLt : CB.dim,
+                  fontSize: 12, fontWeight: 700, letterSpacing: "0.04em",
+                  transition: "all 0.2s ease",
+                }}
+              >
                 {label}
               </button>
             );
           })}
-          <button onClick={() => setShowSettings(true)} style={{
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-            padding: "8px 22px", borderRadius: 14, cursor: "pointer",
-            background: "transparent", border: "1px solid transparent",
-            color: CB.dim, fontSize: 10, fontWeight: 800,
-            letterSpacing: "0.06em", textTransform: "uppercase",
-          }}>
-            <span style={{ fontSize: 20 }}>⚙️</span>
+          <button
+            onClick={() => setShowSettings(true)}
+            style={{
+              padding: "7px 18px", borderRadius: 20, cursor: "pointer",
+              background: "transparent", border: "1px solid transparent",
+              color: CB.dim, fontSize: 12, fontWeight: 700, letterSpacing: "0.04em",
+            }}
+          >
             Settings
           </button>
         </nav>
 
-        {/* ── Settings Modal ── */}
+        {/* ── Settings Modal ────────────────────────────────────────────── */}
         {showSettings && (
           <SettingsModal
             categories={categories}
