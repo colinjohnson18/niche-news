@@ -142,12 +142,25 @@ export async function GET(request) {
       }
       const feed = result.value;
       feed.items?.forEach((item) => {
+        // Google News titles include "Headline - Publisher Name" — extract real publisher
+        let title  = item.title || "Untitled";
+        let source = feed.title || new URL(urls[index]).hostname;
+
+        const isGoogleNews = urls[index]?.includes("news.google.com");
+        if (isGoogleNews) {
+          const dashIdx = title.lastIndexOf(" - ");
+          if (dashIdx > 0) {
+            source = title.slice(dashIdx + 3).trim();
+            title  = title.slice(0, dashIdx).trim();
+          }
+        }
+
         articles.push({
           id:      `${categoryId}-${index}-${item.guid || item.link || item.title}`,
           categoryId,
-          title:   item.title || "Untitled",
+          title,
           link:    item.link  || "",
-          source:  feed.title || new URL(urls[index]).hostname,
+          source,
           pubDate: item.pubDate || item.isoDate || new Date().toISOString(),
           image:   extractImage(item),
           summary: buildSummary(item),
@@ -156,11 +169,19 @@ export async function GET(request) {
       });
     });
 
-    // Newest first, top 20
+    // Newest first
     articles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
+    // Cap at max 3 articles per source to ensure diversity
+    const sourceCounts = {};
+    const diverseArticles = articles.filter((a) => {
+      const key = a.source.toLowerCase().trim();
+      sourceCounts[key] = (sourceCounts[key] || 0) + 1;
+      return sourceCounts[key] <= 3;
+    });
+
     return Response.json({
-      articles:  articles.slice(0, 20),
+      articles:  diverseArticles.slice(0, 25),
       fetchedAt: new Date().toISOString(),
     });
   } catch (error) {
